@@ -9,8 +9,10 @@ app.controller('loginController', ['$scope', '$location', 'authService', 'ngAuth
 
     $scope.message = "";
 
+    //로긴하기
     $scope.login = function () {
 
+        //로긴 후 orders 로 이동하기
         authService.login($scope.loginData).then(function (response) {
 
             $location.path('/orders');

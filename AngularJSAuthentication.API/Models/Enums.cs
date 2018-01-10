@@ -5,6 +5,9 @@ using System.Web;
 
 namespace AngularJSAuthentication.API.Models
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public enum ApplicationTypes
     {
         JavaScript = 0,

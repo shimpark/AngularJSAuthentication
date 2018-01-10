@@ -10,6 +10,7 @@ app.controller('signupController', ['$scope', '$location', '$timeout', 'authServ
         confirmPassword: ""
     };
 
+    //회원가입
     $scope.signUp = function () {
 
         authService.saveRegistration($scope.registration).then(function (response) {
@@ -30,6 +31,7 @@ app.controller('signupController', ['$scope', '$location', '$timeout', 'authServ
          });
     };
 
+    //2초 후 로긴 화면 이동하기
     var startTimer = function () {
         var timer = $timeout(function () {
             $timeout.cancel(timer);

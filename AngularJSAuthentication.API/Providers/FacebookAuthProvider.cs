@@ -8,6 +8,10 @@ using System.Web;
 
 namespace AngularJSAuthentication.API.Providers
 {
+    /// <summary>
+    /// Startup.cs 에서 facebook 사용시 provider 적용
+    /// </summary>
+    /// <seealso cref="Microsoft.Owin.Security.Facebook.FacebookAuthenticationProvider" />
     public class FacebookAuthProvider : FacebookAuthenticationProvider
     {
         public override Task Authenticated(FacebookAuthenticatedContext context)

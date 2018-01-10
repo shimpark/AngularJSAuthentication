@@ -10,9 +10,18 @@ using System.Web;
 
 namespace AngularJSAuthentication.API.Providers
 {
+    /// <summary>
+    /// Startup.cs 에서 RefreshTokenProvider 적용
+    /// </summary>
+    /// <seealso cref="Microsoft.Owin.Security.Infrastructure.IAuthenticationTokenProvider" />
     public class SimpleRefreshTokenProvider : IAuthenticationTokenProvider
     {
 
+        /// <summary>
+        /// Creates the asynchronous.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <returns></returns>
         public async Task CreateAsync(AuthenticationTokenCreateContext context)
         {
             var clientid = context.Ticket.Properties.Dictionary["as:client_id"];
@@ -26,13 +35,14 @@ namespace AngularJSAuthentication.API.Providers
 
             using (AuthRepository _repo = new AuthRepository())
             {
+                //SimpleAuthorizationServerProvider 설정된 RefreshTokenLifeTime 속성 값 가져오기
                 var refreshTokenLifeTime = context.OwinContext.Get<string>("as:clientRefreshTokenLifeTime"); 
                
                 var token = new RefreshToken() 
                 { 
-                    Id = Helper.GetHash(refreshTokenId),
-                    ClientId = clientid, 
-                    Subject = context.Ticket.Identity.Name,
+                    Id = Helper.GetHash(refreshTokenId), //SHA256암호화로 토큰 아이디 암호화
+                    ClientId = clientid, //사이트 아이디(ngAuthApp)
+                    Subject = context.Ticket.Identity.Name, //로긴아이디
                     IssuedUtc = DateTime.UtcNow,
                     ExpiresUtc = DateTime.UtcNow.AddMinutes(Convert.ToDouble(refreshTokenLifeTime)) 
                 };
@@ -42,6 +52,7 @@ namespace AngularJSAuthentication.API.Providers
                 
                 token.ProtectedTicket = context.SerializeTicket();
 
+                //변경 token 값 db 저장하기
                 var result = await _repo.AddRefreshToken(token);
 
                 if (result)
@@ -52,6 +63,11 @@ namespace AngularJSAuthentication.API.Providers
             }
         }
 
+        /// <summary>
+        /// Receives the asynchronous.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <returns></returns>
         public async Task ReceiveAsync(AuthenticationTokenReceiveContext context)
         {
 

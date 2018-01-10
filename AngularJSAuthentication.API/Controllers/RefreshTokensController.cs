@@ -8,6 +8,10 @@ using System.Web.Http;
 
 namespace AngularJSAuthentication.API.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="System.Web.Http.ApiController" />
     [RoutePrefix("api/RefreshTokens")]
     public class RefreshTokensController : ApiController
     {
@@ -19,6 +23,10 @@ namespace AngularJSAuthentication.API.Controllers
             _repo = new AuthRepository();
         }
 
+        /// <summary>
+        /// 모든 토큰 가져오기
+        /// </summary>
+        /// <returns></returns>
         [Authorize(Users="Admin")]
         [Route("")]
         public IHttpActionResult Get()
@@ -27,6 +35,11 @@ namespace AngularJSAuthentication.API.Controllers
         }
 
         //[Authorize(Users = "Admin")]
+        /// <summary>
+        /// 특정 토큰 삭제하기
+        /// </summary>
+        /// <param name="tokenId">The token identifier.</param>
+        /// <returns></returns>
         [AllowAnonymous]
         [Route("")]
         public async Task<IHttpActionResult> Delete(string tokenId)

@@ -12,6 +12,7 @@ app.controller('associateController', ['$scope', '$location','$timeout','authSer
 
     $scope.registerExternal = function () {
 
+        //구글, 페이스북 가입 및 인증하기
         authService.registerExternal($scope.registerData).then(function (response) {
 
             $scope.savedSuccessfully = true;
@@ -28,6 +29,7 @@ app.controller('associateController', ['$scope', '$location','$timeout','authSer
           });
     };
 
+    //2초후 주문화면 이동하기
     var startTimer = function () {
         var timer = $timeout(function () {
             $timeout.cancel(timer);

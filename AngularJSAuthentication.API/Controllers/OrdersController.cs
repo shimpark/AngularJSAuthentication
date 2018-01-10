@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Security.Claims;
 using System.Web.Http;
 
 namespace AngularJSAuthentication.API.Controllers
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <seealso cref="System.Web.Http.ApiController" />
     [RoutePrefix("api/Orders")]
     public class OrdersController : ApiController
     {
@@ -24,12 +24,13 @@ namespace AngularJSAuthentication.API.Controllers
 
             return Ok(Order.CreateOrders());
         }
-
     }
-
 
     #region Helpers
 
+    /// <summary>
+    ///
+    /// </summary>
     public class Order
     {
         public int OrderID { get; set; }
@@ -37,10 +38,13 @@ namespace AngularJSAuthentication.API.Controllers
         public string ShipperCity { get; set; }
         public Boolean IsShipped { get; set; }
 
-
+        /// <summary>
+        /// Creates the orders.
+        /// </summary>
+        /// <returns></returns>
         public static List<Order> CreateOrders()
         {
-            List<Order> OrderList = new List<Order> 
+            List<Order> OrderList = new List<Order>
             {
                 new Order {OrderID = 10248, CustomerName = "Taiseer Joudeh", ShipperCity = "Amman", IsShipped = true },
                 new Order {OrderID = 10249, CustomerName = "Ahmad Hasan", ShipperCity = "Dubai", IsShipped = false},
@@ -53,5 +57,5 @@ namespace AngularJSAuthentication.API.Controllers
         }
     }
 
-    #endregion
+    #endregion Helpers
 }

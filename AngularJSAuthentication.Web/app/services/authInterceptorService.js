@@ -3,11 +3,13 @@ app.factory('authInterceptorService', ['$q', '$injector','$location', 'localStor
 
     var authInterceptorServiceFactory = {};
 
+    //rquest headers 에서 Authorization 에 token 값 추가함.
     var _request = function (config) {
 
         config.headers = config.headers || {};
        
         var authData = localStorageService.get('authorizationData');
+        
         if (authData) {
             config.headers.Authorization = 'Bearer ' + authData.token;
         }

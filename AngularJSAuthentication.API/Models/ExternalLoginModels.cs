@@ -6,6 +6,9 @@ using System.Web;
 
 namespace AngularJSAuthentication.API.Models
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ExternalLoginViewModel
     {
         public string Name { get; set; }
@@ -15,6 +18,9 @@ namespace AngularJSAuthentication.API.Models
         public string State { get; set; }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class RegisterExternalBindingModel
     {
         [Required]
@@ -28,6 +34,9 @@ namespace AngularJSAuthentication.API.Models
 
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class ParsedExternalAccessToken
     {
         public string user_id { get; set; }

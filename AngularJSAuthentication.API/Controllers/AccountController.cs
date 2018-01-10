@@ -33,7 +33,13 @@ namespace AngularJSAuthentication.API.Controllers
             _repo = new AuthRepository();
         }
 
-        // POST api/Account/Register
+        
+        /// <summary>
+        /// 가입하기
+        /// POST api/Account/Register
+        /// </summary>
+        /// <param name="userModel">The user model.</param>
+        /// <returns></returns>
         [AllowAnonymous]
         [Route("Register")]
         public async Task<IHttpActionResult> Register(UserModel userModel)
@@ -55,7 +61,13 @@ namespace AngularJSAuthentication.API.Controllers
              return Ok();
         }
 
-        // GET api/Account/ExternalLogin
+        /// <summary>
+        /// 외부인증하기
+        /// GET api/Account/ExternalLogin
+        /// </summary>
+        /// <param name="provider">google, facebook</param>
+        /// <param name="error">The error.</param>
+        /// <returns></returns>
         [OverrideAuthentication]
         [HostAuthentication(DefaultAuthenticationTypes.ExternalCookie)]
         [AllowAnonymous]
@@ -93,7 +105,7 @@ namespace AngularJSAuthentication.API.Controllers
                 Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
                 return new ChallengeResult(provider, this);
             }
-
+            
             IdentityUser user = await _repo.FindAsync(new UserLoginInfo(externalLogin.LoginProvider, externalLogin.ProviderKey));
 
             bool hasRegistered = user != null;
@@ -109,7 +121,13 @@ namespace AngularJSAuthentication.API.Controllers
 
         }
 
-        // POST api/Account/RegisterExternal
+
+        /// <summary>
+        /// google, facebook 로 회원가입하기
+        /// POST api/Account/RegisterExternal
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <returns></returns>
         [AllowAnonymous]
         [Route("RegisterExternal")]
         public async Task<IHttpActionResult> RegisterExternal(RegisterExternalBindingModel model)
@@ -120,12 +138,14 @@ namespace AngularJSAuthentication.API.Controllers
                 return BadRequest(ModelState);
             }
 
+            //facebook, google 인증 할 경우, 맞으면 user_id, app_id 반환받음
             var verifiedAccessToken = await VerifyExternalAccessToken(model.Provider, model.ExternalAccessToken);
             if (verifiedAccessToken == null)
             {
                 return BadRequest("Invalid Provider or External Access Token");
             }
 
+            //facebook, google 인증으로 UserLogin 검색하여 IdentityUser 조회하기
             IdentityUser user = await _repo.FindAsync(new UserLoginInfo(model.Provider, verifiedAccessToken.user_id));
 
             bool hasRegistered = user != null;
@@ -137,6 +157,7 @@ namespace AngularJSAuthentication.API.Controllers
 
             user = new IdentityUser() { UserName = model.UserName };
 
+            //사용자 추가하기
             IdentityResult result = await _repo.CreateAsync(user);
             if (!result.Succeeded)
             {
@@ -161,6 +182,13 @@ namespace AngularJSAuthentication.API.Controllers
             return Ok(accessTokenResponse);
         }
 
+        /// <summary>
+        /// facebook, google 로 인증자에게 토큰 제공해 주기
+        /// GET api/Account/ObtainLocalAccessToken
+        /// </summary>
+        /// <param name="provider">facebook, google 로 인증</param>
+        /// <param name="externalAccessToken">access token.</param>
+        /// <returns></returns>
         [AllowAnonymous]
         [HttpGet]
         [Route("ObtainLocalAccessToken")]
@@ -169,31 +197,36 @@ namespace AngularJSAuthentication.API.Controllers
 
             if (string.IsNullOrWhiteSpace(provider) || string.IsNullOrWhiteSpace(externalAccessToken))
             {
-                return BadRequest("Provider or external access token is not sent");
+                return BadRequest("Provider 또는 외부 Access Token 값이 없습니다.");
             }
 
             var verifiedAccessToken = await VerifyExternalAccessToken(provider, externalAccessToken);
             if (verifiedAccessToken == null)
             {
-                return BadRequest("Invalid Provider or External Access Token");
+                return BadRequest("Provider 또는 외부 Access Token 값이 맞지 않습니다.");
             }
 
+            //IdentityUser 정보 가져오기
             IdentityUser user = await _repo.FindAsync(new UserLoginInfo(provider, verifiedAccessToken.user_id));
 
             bool hasRegistered = user != null;
 
             if (!hasRegistered)
             {
-                return BadRequest("External user is not registered");
+                return BadRequest("facebook 및 goolge 인증 사용자로 등록되어 있지 않습니다.");
             }
 
-            //generate access token response
+            //로그인 별 토큰값 반환해 주기
             var accessTokenResponse = GenerateLocalAccessTokenResponse(user.UserName);
 
             return Ok(accessTokenResponse);
 
         }
 
+        /// <summary>
+        /// Releases the unmanaged resources that are used by the object and, optionally, releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -206,6 +239,11 @@ namespace AngularJSAuthentication.API.Controllers
 
         #region Helpers
 
+        /// <summary>
+        /// 에러결과
+        /// </summary>
+        /// <param name="result">The result.</param>
+        /// <returns></returns>
         private IHttpActionResult GetErrorResult(IdentityResult result)
         {
             if (result == null)
@@ -235,6 +273,12 @@ namespace AngularJSAuthentication.API.Controllers
             return null;
         }
 
+        /// <summary>
+        /// Validates the client and redirect URI.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="redirectUriOutput">The redirect URI output.</param>
+        /// <returns></returns>
         private string ValidateClientAndRedirectUri(HttpRequestMessage request, ref string redirectUriOutput)
         {
 
@@ -244,33 +288,33 @@ namespace AngularJSAuthentication.API.Controllers
 
             if (string.IsNullOrWhiteSpace(redirectUriString))
             {
-                return "redirect_uri is required";
+                return "redirect_uri 값이 필요합니다.";
             }
 
             bool validUri = Uri.TryCreate(redirectUriString, UriKind.Absolute, out redirectUri);
 
             if (!validUri)
             {
-                return "redirect_uri is invalid";
+                return "redirect_uri 값이 맞지 않습니다.";
             }
 
             var clientId = GetQueryString(Request, "client_id");
 
             if (string.IsNullOrWhiteSpace(clientId))
             {
-                return "client_Id is required";
+                return "client_Id 값이 필요합니다.";
             }
 
             var client = _repo.FindClient(clientId);
 
             if (client == null)
             {
-                return string.Format("Client_id '{0}' is not registered in the system.", clientId);
+                return string.Format("Client_id '{0}' 은 등록되어 있지 않습니다.", clientId);
             }
 
             if (!string.Equals(client.AllowedOrigin, redirectUri.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase))
             {
-                return string.Format("The given URL is not allowed by Client_id '{0}' configuration.", clientId);
+                return string.Format("Client_id '{0}' 은 해당 url 로 접근이 불가 합니다.", clientId);
             }
 
             redirectUriOutput = redirectUri.AbsoluteUri;
@@ -292,6 +336,12 @@ namespace AngularJSAuthentication.API.Controllers
             return match.Value;
         }
 
+        /// <summary>
+        /// facebook , goolge 로 인증하여 user_id 와 app_id 가져오기
+        /// </summary>
+        /// <param name="provider">Facebook or Google</param>
+        /// <param name="accessToken">The access token.</param>
+        /// <returns></returns>
         private async Task<ParsedExternalAccessToken> VerifyExternalAccessToken(string provider, string accessToken)
         {
             ParsedExternalAccessToken parsedToken = null;
@@ -302,7 +352,7 @@ namespace AngularJSAuthentication.API.Controllers
             {
                 //You can get it from here: https://developers.facebook.com/tools/accesstoken/
                 //More about debug_tokn here: http://stackoverflow.com/questions/16641083/how-does-one-get-the-app-access-token-for-debug-token-inspection-on-facebook
-                var appToken = "xxxxxx";
+                var appToken = "2005404516451956|9HBMoqkwMGvari-bB0gePSw09cY";
                 verifyTokenEndPoint = string.Format("https://graph.facebook.com/debug_token?input_token={0}&access_token={1}", accessToken, appToken);
             }
             else if (provider == "Google")
@@ -353,10 +403,15 @@ namespace AngularJSAuthentication.API.Controllers
             return parsedToken;
         }
 
+        /// <summary>
+        /// 사용자별 토큰 생성해 주기
+        /// </summary>
+        /// <param name="userName">Name of the user.</param>
+        /// <returns></returns>
         private JObject GenerateLocalAccessTokenResponse(string userName)
         {
 
-            var tokenExpiration = TimeSpan.FromDays(1);
+            var tokenExpiration = TimeSpan.FromDays(1); //만기일은 하루
 
             ClaimsIdentity identity = new ClaimsIdentity(OAuthDefaults.AuthenticationType);
 
@@ -385,6 +440,9 @@ namespace AngularJSAuthentication.API.Controllers
             return tokenResponse;
         }
 
+        /// <summary>
+        /// google, facebook 관련 인증 정보
+        /// </summary>
         private class ExternalLoginData
         {
             public string LoginProvider { get; set; }
@@ -392,6 +450,11 @@ namespace AngularJSAuthentication.API.Controllers
             public string UserName { get; set; }
             public string ExternalAccessToken { get; set; }
 
+            /// <summary>
+            /// Froms the identity.
+            /// </summary>
+            /// <param name="identity">The identity.</param>
+            /// <returns></returns>
             public static ExternalLoginData FromIdentity(ClaimsIdentity identity)
             {
                 if (identity == null)
